@@ -67,7 +67,7 @@ var (
 			Argument:  "tags",
 			Shorthand: "t",
 			Default:   []string{},
-			Usage:     "Filter services by a comma-separated list of tags (requires --service)",
+			Usage:     "Filter services by a comma-separated list of tags",
 			Value:     &plugin.Tags,
 		},
 		{
@@ -76,7 +76,7 @@ var (
 			Argument:  "all",
 			Shorthand: "a",
 			Default:   false,
-			Usage:     "Get all services (not compatible with --tags)",
+			Usage:     "Get all services",
 			Value:     &plugin.All,
 		},
 		{
@@ -124,9 +124,9 @@ func main() {
 }
 
 func checkArgs(event *types.Event) (int, error) {
-	if len(plugin.Tags) > 0 && plugin.All {
-		return sensu.CheckStateCritical, fmt.Errorf("--tags and --all are mutually exclusive")
-	}
+	// if len(plugin.Tags) > 0 && plugin.All {
+	// 	return sensu.CheckStateCritical, fmt.Errorf("--tags and --all are mutually exclusive")
+	// }
 	return sensu.CheckStateOK, nil
 }
 
@@ -162,7 +162,24 @@ func executeCheck(event *types.Event) (int, error) {
 
 	var healthChecks consul.HealthChecks
 
-	if len(plugin.Service) > 0 && len(plugin.Tags) > 0 {
+	if plugin.All && len(plugin.Tags) > 0 {
+		var err error
+		var qr consul.QueryOptions
+		var filters []string
+
+		for _, tag := range plugin.Tags {
+			filters = append(filters, fmt.Sprintf(`"%s" in ServiceTags`, tag))
+		}
+
+		qr.Filter = strings.Join(filters, " and ")
+		fmt.Printf("Using filter: %s\n", qr.Filter)
+
+		healthChecks, _, err = health.State("any", &qr)
+
+		if err != nil {
+			return sensu.CheckStateCritical, fmt.Errorf("Failed to get health checks for serviceTags \"%s\": %v", plugin.Tags, err)
+		}
+	} else if len(plugin.Service) > 0 && len(plugin.Tags) > 0 {
 		// Future support for filters?
 		// serviceEntries, _, err := health.Service(plugin.Service, plugin.Tags, false, &QueryOptions{Filter: "Node == foo and tag1 in ServiceTags"})
 		serviceEntries, _, err := health.ServiceMultipleTags(plugin.Service, plugin.Tags, false, nil)
@@ -214,7 +231,6 @@ func executeCheck(event *types.Event) (int, error) {
 			fmt.Printf("%s WARNING: %s on %s\n", plugin.PluginConfig.Name, v.CheckID, v.Node)
 		}
 	}
-
 	if !found && plugin.FailIfNotFound {
 		fmt.Printf("%s CRITICAL: no checks found for provided arguments\n", plugin.PluginConfig.Name)
 		return sensu.CheckStateCritical, nil
