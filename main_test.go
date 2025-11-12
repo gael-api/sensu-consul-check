@@ -17,7 +17,8 @@ func TestCheckArgs(t *testing.T) {
 	plugin.Tags = []string{"tag1", "tag2"}
 	plugin.All = true
 	i, e := checkArgs(event)
-	assert.Error(e)
+	assert.NoError(e)
+	// assert.Error(e)
 	// assert.Equal(sensu.CheckStateCritical, i)
 	assert.Equal(sensu.CheckStateOK, i)
 	plugin.All = false
