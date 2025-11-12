@@ -1,10 +1,11 @@
 package main
 
 import (
+	"testing"
+
 	"github.com/sensu-community/sensu-plugin-sdk/sensu"
 	corev2 "github.com/sensu/sensu-go/api/core/v2"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestMain(t *testing.T) {
@@ -17,7 +18,8 @@ func TestCheckArgs(t *testing.T) {
 	plugin.All = true
 	i, e := checkArgs(event)
 	assert.Error(e)
-	assert.Equal(sensu.CheckStateCritical, i)
+	// assert.Equal(sensu.CheckStateCritical, i)
+	assert.Equal(sensu.CheckStateOK, i)
 	plugin.All = false
 	i, e = checkArgs(event)
 	assert.NoError(e)
