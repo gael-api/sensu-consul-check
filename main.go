@@ -135,7 +135,7 @@ func executeCheck(event *types.Event) (int, error) {
 	if strings.HasPrefix(plugin.ConsulServer, "http://") || strings.HasPrefix(plugin.ConsulServer, "https://") {
 		url, err := url.Parse(plugin.ConsulServer)
 		if err != nil {
-			return sensu.CheckStateCritical, fmt.Errorf("Failed to parse consul server URL %s: %v", plugin.ConsulServer, err)
+			return sensu.CheckStateCritical, fmt.Errorf("failed to parse consul server URL %s: %v", plugin.ConsulServer, err)
 		}
 		conf.Address = url.Host
 		conf.Scheme = url.Scheme
@@ -156,7 +156,7 @@ func executeCheck(event *types.Event) (int, error) {
 
 	client, err := consul.NewClient(conf)
 	if err != nil {
-		return sensu.CheckStateCritical, fmt.Errorf("Failed to create Consul client: %v", err)
+		return sensu.CheckStateCritical, fmt.Errorf("failed to create Consul client: %v", err)
 	}
 	health := client.Health()
 
@@ -172,19 +172,18 @@ func executeCheck(event *types.Event) (int, error) {
 		}
 
 		qr.Filter = strings.Join(filters, " and ")
-		fmt.Printf("Using filter: %s\n", qr.Filter)
 
 		healthChecks, _, err = health.State("any", &qr)
 
 		if err != nil {
-			return sensu.CheckStateCritical, fmt.Errorf("Failed to get health checks for serviceTags \"%s\": %v", plugin.Tags, err)
+			return sensu.CheckStateCritical, fmt.Errorf("failed to get health checks for serviceTags \"%s\": %v", plugin.Tags, err)
 		}
 	} else if len(plugin.Service) > 0 && len(plugin.Tags) > 0 {
 		// Future support for filters?
 		// serviceEntries, _, err := health.Service(plugin.Service, plugin.Tags, false, &QueryOptions{Filter: "Node == foo and tag1 in ServiceTags"})
 		serviceEntries, _, err := health.ServiceMultipleTags(plugin.Service, plugin.Tags, false, nil)
 		if err != nil {
-			return sensu.CheckStateCritical, fmt.Errorf("Failed to get Service health for %q: %v", plugin.Service, err)
+			return sensu.CheckStateCritical, fmt.Errorf("failed to get Service health for %q: %v", plugin.Service, err)
 		}
 		for _, v := range serviceEntries {
 			healthChecks = append(healthChecks, v.Checks...)
@@ -193,18 +192,18 @@ func executeCheck(event *types.Event) (int, error) {
 		var err error
 		healthChecks, _, err = health.Node(plugin.Node, nil)
 		if err != nil {
-			return sensu.CheckStateCritical, fmt.Errorf("Failed to get health checks for node %q: %v", plugin.Node, err)
+			return sensu.CheckStateCritical, fmt.Errorf("failed to get health checks for node %q: %v", plugin.Node, err)
 		}
 	} else if plugin.All {
 		var err error
 		healthChecks, _, err = health.State("any", nil)
 		if err != nil {
-			return sensu.CheckStateCritical, fmt.Errorf("Failed to get health checks for \"any\": %v", err)
+			return sensu.CheckStateCritical, fmt.Errorf("failed to get health checks for \"any\": %v", err)
 		}
 	} else if len(plugin.Service) > 0 {
 		serviceEntries, _, err := health.Service(plugin.Service, "", false, nil)
 		if err != nil {
-			return sensu.CheckStateCritical, fmt.Errorf("Failed to get Service health for %q: %v", plugin.Service, err)
+			return sensu.CheckStateCritical, fmt.Errorf("failed to get Service health for %q: %v", plugin.Service, err)
 		}
 		for _, v := range serviceEntries {
 			healthChecks = append(healthChecks, v.Checks...)
