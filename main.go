@@ -224,14 +224,14 @@ func executeCheck(event *types.Event) (int, error) {
 		switch v.Status {
 		case "critical", "unknown":
 			criticals++
-			fmt.Printf("%s CRITICAL: %s on %s\n", plugin.PluginConfig.Name, v.CheckID, v.Node)
+			fmt.Printf("%s CRITICAL: %s on %s\n", plugin.Name, v.CheckID, v.Node)
 		case "warning":
 			warnings++
-			fmt.Printf("%s WARNING: %s on %s\n", plugin.PluginConfig.Name, v.CheckID, v.Node)
+			fmt.Printf("%s WARNING: %s on %s\n", plugin.Name, v.CheckID, v.Node)
 		}
 	}
 	if !found && plugin.FailIfNotFound {
-		fmt.Printf("%s CRITICAL: no checks found for provided arguments\n", plugin.PluginConfig.Name)
+		fmt.Printf("%s CRITICAL: no checks found for provided arguments\n", plugin.Name)
 		return sensu.CheckStateCritical, nil
 	}
 	if criticals > 0 {
