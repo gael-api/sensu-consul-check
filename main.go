@@ -241,9 +241,9 @@ func executeCheck(event *types.Event) (int, error) {
 	}
 
 	if found {
-		fmt.Printf("%s OK: All Consul service checks are passing\n", plugin.PluginConfig.Name)
+		fmt.Printf("%s OK: All Consul service checks are passing\n", plugin.Name)
 	} else {
-		fmt.Printf("%s OK: no checks found for provided arguments\n", plugin.PluginConfig.Name)
+		fmt.Printf("%s OK: no checks found for provided arguments\n", plugin.Name)
 	}
 	return sensu.CheckStateOK, nil
 }
